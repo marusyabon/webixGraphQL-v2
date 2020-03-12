@@ -1,7 +1,7 @@
 import {JetView} from 'webix-jet';
 import BookCard from './bookCard';
-import booksModel from '../models/books';
 import filesModel from '../models/files';
+import {getAllBooksQuery, deleteBook} from '../graphqlQueries';
 
 export default class Library extends JetView {
 	config() {
@@ -105,7 +105,8 @@ export default class Library extends JetView {
 				'fa-trash': (e, id) => {
 					this.removeBook(id);
 				}
-			}
+			},
+			url: getAllBooksQuery
 		};
 
 		const footer = {
@@ -123,28 +124,11 @@ export default class Library extends JetView {
 
 	async init() {
 		this.grid = $$('dtLibrary');
-		await this.getData();
 		// await this.getFiles();
 		// this.checkFiles();		
 
-		this.grid.parse(this.booksArr);
+		// this.grid.parse(this.booksArr);
 		this._bookCard = this.ui(BookCard);
-	}
-
-	async getData() {	
-		this.booksArr = [];
-
-		try {
-			const dbData = await booksModel.getDataFromServer();
-			let booksArr = dbData.data.getAllBooks;
-			booksArr = booksArr.map((el) => {
-				el.year_of_publication ? new Date(el.year_of_publication) : '';
-				return el;
-			});
-			this.booksArr = booksArr;
-		} catch (err) {
-			console.log(err)
-		}
 	}
 
 	async getFiles() {
@@ -170,13 +154,12 @@ export default class Library extends JetView {
 		this._bookCard.showPopup(book);
 	}
 
-	async removeBook(id) {
+	removeBook(id) {
 		const book = this.grid.getItem(id);
-		const result = await booksModel.removeItem(book._id);
-		if (result) {
-			return this.grid.remove(id);
-		}
-		return false;		
+		deleteBook(book._id).then(() => {
+			this.grid.remove(id);
+		});
+		return false;
 	}
 
 	addBook() {

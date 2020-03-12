@@ -1,5 +1,5 @@
 import { JetView } from "webix-jet";
-import booksModel from '../models/books';
+import {getAllBooks} from '../graphqlQueries';
 
 export default class bookTops extends JetView {
 	config() {
@@ -65,9 +65,8 @@ export default class bookTops extends JetView {
 
 	async init() {
 		this.grid = $$('booksTop');
-
-		const dbData = await booksModel.getDataFromServer();
-		let booksArr = dbData.data.getAllBooks;
+		let booksArr = await getAllBooks();
+		
 		booksArr = booksArr.map((el) => {
 			el.yearOfPublication = new Date(el.yearOfPublication);
 			return el;

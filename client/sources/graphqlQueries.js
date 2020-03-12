@@ -14,30 +14,59 @@ const bookData = `
     orderedTimes
 `;
 
-const addBookQuery = `mutation($input: BookInput) {
-    addBook(input: $input) {
-      ${bookData}
-    }
-}`
-
-const updateBookQuery = `mutation($bookID: ID!, $input: BookInput) {
-    updateBook(bookID: $bookID, input: $input)
-}`
-
-const getBookQuery = `query($bookID: ID!) {
-    getBook(bookID: $bookID) {
+const getAllBooksQuery = `GraphQL->{ 
+    getAllBooks{ 
         ${bookData}
     }
 }`;
 
-const getAllBooksQuery = `query {
-    getAllBooks {
-        ${bookData}
-    }
-}`;
+function addBook (input) {
+    return webix.proxy("GraphQL", `
+        mutation addBook($input: BookInput){
+            addBook(input: $input){
+                ${bookData}
+            }
+        }`)
+        .save({input})
+}
 
-const deleteBookQuery = `mutation($bookID: ID!) {
-    deleteBook(bookID: $bookID)
-}`;
+function updateBook (bookID, input) {
+    return webix.proxy("GraphQL", `
+        mutation updateBook($bookID: ID!, $input: BookInput){
+            updateBook(bookID: $bookID, input: $input)
+        }`)
+        .save({bookID, input})
+}
 
-export {getBookQuery, getAllBooksQuery, addBookQuery, updateBookQuery, deleteBookQuery};
+function getBook (bookID) {
+    return webix.proxy('GraphQL', `
+        query($bookID: ID!) {
+            getBook(bookID: $bookID) {
+                ${bookData}
+            }
+        }
+    `)
+    .load({bookID})
+};
+
+function getAllBooks () {
+    return webix.proxy('GraphQL', `
+        query {
+            getAllBooks {
+                ${bookData}
+            }
+        }
+    `)
+    .load()
+};
+
+function deleteBook (bookID) {
+    return webix.proxy('GraphQL', `
+        mutation deleteBook($bookID: ID!) {
+            deleteBook(bookID: $bookID)
+            }
+        `)
+        .save({bookID});
+}
+
+export {bookData, getAllBooksQuery, getBook, getAllBooks, addBook, updateBook, deleteBook};

@@ -1,8 +1,8 @@
 import {JetView} from 'webix-jet';
-import booksModel from '../models/books';
 import {DUMMYCOVER, URL} from '../consts';
 import {toggleElement} from '../scripts'; 
 import filesModel from '../models/files';
+import {addBook, updateBook, getAllBooksQuery, getBook} from '../graphqlQueries';
 
 export default class BookCard extends JetView {
 	config() {
@@ -12,8 +12,8 @@ export default class BookCard extends JetView {
 			width: 120,
 			height: 180,
 			css: 'book_cover',
-			template: (url) => {
-				return `<div style="background-image: url(${url})" ></div>`;
+			template: (_url) => {
+				return `<div style="background-image: url(${_url})" ></div>`;
 			}
 		};
 
@@ -176,33 +176,16 @@ export default class BookCard extends JetView {
 		// toggleElement(!this.isNew, this.$$('addingFilesButtons'));
 
 		if (!this.isNew) {
-			booksModel.getBook(book._id).then((res) => {
-				// const filesArr = book.files;
-				// const textFiles = [];
-				// const audioFiles = [];
-
-				// filesArr.forEach((file) => {
-				// 	switch(file.dataType) {
-				// 		case 'text':
-				// 			textFiles.push(file);
-				// 			break;
-				// 		case 'audio':
-				// 			audioFiles.push(file);
-				// 			break;
-				// 	}
-				// });
-
-				this.form.setValues(res.data.getBook);
-				this.$$('bookCover').setValues(book.coverPhoto || DUMMYCOVER);
-				// this.$$('availableTextFiles').parse(textFiles);
-				// this.$$('availableAudioFiles').parse(audioFiles);
-			});						
+			getBook(book._id).then((data) => {
+				this.form.setValues(data);
+				this.$$('bookCover').setValues(data.coverPhoto || DUMMYCOVER);
+			});					
 		}		
 
 		this.getRoot().show();	
 	}
 
-	async saveForm() {
+	saveForm() {
 		const data = this.form.getValues();
 
 		data.numberOfPages = Number.parseInt(data.numberOfPages);
@@ -210,13 +193,11 @@ export default class BookCard extends JetView {
 
 		if (this.form.validate()) {
 			if (this.isNew) {
-				const response = await booksModel.addItem(data);
-				if (response) {
+				addBook(data).then(() => {
 					this.dtLibrary.clearAll();
-					const newData = await booksModel.getDataFromServer();
-					this.dtLibrary.parse(newData.data.getAllBooks);
+					this.dtLibrary.load(getAllBooksQuery);
 					this.hideWindow();
-				}
+				});
 			}
 			else {
 				const book = {...data};
@@ -226,26 +207,24 @@ export default class BookCard extends JetView {
 				delete book.viewedTimes;
 				delete book.orderedTimes;
 
-				const response = await booksModel.updateItem(data._id, book);
-				if (response) {
-					const newData = await booksModel.getDataFromServer();
+				updateBook(data._id, book).then(() => {
 					this.dtLibrary.clearAll();
-					this.dtLibrary.parse(newData.data.getAllBooks);
+					this.dtLibrary.load(getAllBooksQuery);
 					this.hideWindow();
-				}
+				});
 			}
 
-			this.$$('bookFiles').send((response) => {
-				if(response){
-					this.webix.message(response.message);
-				}
-			});
+			// this.$$('bookFiles').send((response) => {
+			// 	if(response){
+			// 		this.webix.message(response.message);
+			// 	}
+			// });
 
-			this.$$('audioFiles').send((response) => {
-				if(response){
-					this.webix.message(response.message);
-				}
-			});
+			// this.$$('audioFiles').send((response) => {
+			// 	if(response){
+			// 		this.webix.message(response.message);
+			// 	}
+			// });
 		}		
 	}
 
