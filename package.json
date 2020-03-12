@@ -1,0 +1,43 @@
+{
+  "name": "webixgraphql",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon -r esm server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marusyabon/webixGraphQL.git"
+  },
+  "keywords": [
+    "webix",
+    "graphQL"
+  ],
+  "author": "Marina Bondarenko",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/marusyabon/webixGraphQL/issues"
+  },
+  "homepage": "https://github.com/marusyabon/webixGraphQL#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "fs": "0.0.1-security"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.8.7",
+    "@babel/node": "^7.8.7",
+    "@babel/preset-env": "^7.8.7",
+    "eslint": "^6.8.0",
+    "eslint-config-xbsoftware": "git+https://bitbucket.org/xbsltd/eslint.git#v3.0.0",
+    "eslint-plugin-import": "^2.20.1",
+    "esm": "^3.2.25",
+    "express": "^4.17.1",
+    "express-graphql": "^0.9.0",
+    "graphql": "^14.6.0",
+    "mongoose": "^5.9.3",
+    "nodemon": "^2.0.2",
+    "path": "^0.12.7"
+  }
+}
