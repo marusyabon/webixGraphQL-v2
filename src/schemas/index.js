@@ -2,6 +2,7 @@ import {buildSchema} from 'graphql';
 
 const schema = buildSchema(`
     scalar Date
+    scalar Upload
 
     type Query {
         getAllBooks: [Book]
@@ -22,6 +23,15 @@ const schema = buildSchema(`
         isFiles: Boolean
         viewedTimes: Int
         orderedTimes: Int
+        files: [File]
+    }
+
+    type File {
+        _id: ID
+        name: String
+        url: ID
+        bookId: String
+        dataType: String
     }
 
     input BookInput {
@@ -40,6 +50,14 @@ const schema = buildSchema(`
         addBook(input: BookInput): Book
         updateBook(bookID: ID!, input: BookInput): Boolean
         deleteBook(bookID: ID!): Boolean
+        uploadFile(input: FileInput): Boolean
+    }
+
+    input FileInput {
+        upload: String
+        upload_fullpath: String
+        bookId: String
+        fileType: String
     }
 `);
 

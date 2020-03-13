@@ -1,8 +1,8 @@
 import {JetView} from 'webix-jet';
-import {DUMMYCOVER, URL} from '../consts';
+import {DUMMYCOVER} from '../consts';
 import {toggleElement} from '../scripts'; 
-import filesModel from '../models/files';
-import {addBook, updateBook, getAllBooksQuery, getBook} from '../graphqlQueries';
+import {addBook, updateBook, getAllBooksQuery, getBook} from '../graphqlQueries/books';
+import {saveFile} from '../graphqlQueries/files';
 
 export default class BookCard extends JetView {
 	config() {
@@ -43,12 +43,7 @@ export default class BookCard extends JetView {
 			type: 'htmlbutton',
 			autosend: false,
 			width: 150,
-			formData: () => ({
-				userId: this.userId,
-				bookId: this.bookId
-			}),
 			accept: 'text/plain, application/pdf, .doc, .docx',
-			upload: 'http://localhost:3000/files/upload/text',
 			link: 'filesList'
 		};
 
@@ -60,56 +55,11 @@ export default class BookCard extends JetView {
 			borderless:true
 		};
 
-		const addAudioFile = {
-			view: 'uploader',
-			label: '<i class="fas fa-music"></i> Upload audio',
-			localId: 'audioFiles',
-			type: 'htmlbutton',
-			autosend: false,
-			width: 150,
-			formData: () => {
-				return {
-					userId: this.userId,
-					bookId: this.bookId
-				};
-			},
-			accept: '.mp3',
-			upload: 'http://localhost:3000/files/upload/audio',
-			link: 'audioList'
-		};
-
-		const audioList = {
-			view: 'list',
-			type: 'uploader',
-			id: 'audioList',
-			autoheight:true, 
-			borderless:true
-		};
-
 		const availableTextFiles = {
 			view: 'activeList',
 			localId: 'availableTextFiles',
 			autoheight: true,
-			template: '#name# <span class="list_button"><i class = "fas fa-times"></i></span>',
-			onClick: {
-				'fa-times': (ev, id) => {
-					this.removeFile(this.$$('availableTextFiles'), id);
-					return false;
-				}
-			}
-		};
-
-		const availableAudioFiles = {
-			view: 'activeList',
-			localId: 'availableAudioFiles',
-			autoheight: true,
-			template: '#name# <span class="list_button"><i class = "fas fa-times"></i></span>',
-			onClick: {
-				'fa-times': (ev, id) => {
-					this.removeFile(this.$$('availableAudioFiles'), id);
-					return false;
-				}
-			}
+			template: '#name# <span class="list_button"></span>'
 		};
 
 		const saveBtn = {
@@ -140,15 +90,13 @@ export default class BookCard extends JetView {
 						},
 						{height: 2},
 						availableTextFiles,
-						availableAudioFiles,
 						filesList,
-						audioList,
-						// {height: 15},
-						// { 
-						// 	localId: 'addingFilesButtons',
-						// 	margin: 10,
-						// 	cols: [ {}, addTextFile, addAudioFile, {} ] 
-						// },
+						{height: 15},
+						{ 
+							localId: 'addingFilesButtons',
+							margin: 10,
+							cols: [ {}, addTextFile, {} ] 
+						},
 						{height: 1},
 						{
 							paddingY: 10,
@@ -173,12 +121,13 @@ export default class BookCard extends JetView {
 		this.isNew = book ? false : true;
 		this.bookId = book ? book._id : '';
 		toggleElement(!this.isNew, this.$$('bookCover'));
-		// toggleElement(!this.isNew, this.$$('addingFilesButtons'));
+		toggleElement(!this.isNew, this.$$('addingFilesButtons'));
 
 		if (!this.isNew) {
 			getBook(book._id).then((data) => {
 				this.form.setValues(data);
 				this.$$('bookCover').setValues(data.coverPhoto || DUMMYCOVER);
+				this.$$('availableTextFiles').parse(data.files);
 			});					
 		}		
 
@@ -214,24 +163,18 @@ export default class BookCard extends JetView {
 				});
 			}
 
-			// this.$$('bookFiles').send((response) => {
-			// 	if(response){
-			// 		this.webix.message(response.message);
-			// 	}
-			// });
+			const uploadedFile = this.$$('bookFiles').files.data.pull;
+			const fileInput = Object.values(uploadedFile)[0];
 
-			// this.$$('audioFiles').send((response) => {
-			// 	if(response){
-			// 		this.webix.message(response.message);
-			// 	}
-			// });
+			const file = {
+				upload: fileInput.file,
+				upload_fullpath: fileInput.name,
+				bookId: this.bookId,
+				fileType: 'text'
+			};
+
+			saveFile(file);
 		}		
-	}
-
-	removeFile(targetList, id) {
-		filesModel.removeItem(id).then(() => {
-			targetList.remove(id);
-		});
 	}
 
 	hideWindow() {
@@ -242,9 +185,7 @@ export default class BookCard extends JetView {
 	clearForm (){
 		this.form.clearValidation();
 		this.form.clear();
-		// this.$$('bookFiles').files.clearAll();
-		// this.$$('audioFiles').files.clearAll();
+		this.$$('bookFiles').files.clearAll();
 		this.$$('availableTextFiles').clearAll();
-		this.$$('availableAudioFiles').clearAll();
 	}
 }

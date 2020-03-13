@@ -43,6 +43,13 @@ function getBook (bookID) {
         query($bookID: ID!) {
             getBook(bookID: $bookID) {
                 ${bookData}
+                files {
+                    _id
+                    name
+                    url
+                    bookId
+                    dataType
+                }
             }
         }
     `)

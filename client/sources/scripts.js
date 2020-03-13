@@ -7,18 +7,6 @@ function toggleElement (condition, element) {
 	}
 }
 
-async function addItem (Model, data, successAction) {
-	await Model.addItem(data);
-	const newData = await Model.getDataFromServer();
-	successAction(newData);
-}
-
-async function updateItem (Model, data, successAction) {
-	await Model.updateItem(data);
-	const newData = await Model.getDataFromServer();
-	successAction(newData);
-}
-
 webix.protoUI({
 	name: 'activeList',
 	defaults: {
@@ -30,4 +18,4 @@ webix.protoUI({
 	}
 }, webix.ui.list);
 
-export {toggleElement, addItem, updateItem};
+export {toggleElement};

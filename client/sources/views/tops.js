@@ -1,5 +1,5 @@
 import { JetView } from "webix-jet";
-import {getAllBooks} from '../graphqlQueries';
+import {getAllBooks} from '../graphqlQueries/books';
 
 export default class bookTops extends JetView {
 	config() {

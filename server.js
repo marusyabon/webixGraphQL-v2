@@ -12,14 +12,12 @@ const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', express.static(path.join(__dirname, 'public')));
-app.use('/graphql', (req, res) => {
-    return graphqlHTTP({
-        schema,
-        rootValue: resolvers,
-        graphiql: true,
-        context: {req, res}
-    })(req, res);
-});
+app.use('/graphql', (req, res) => graphqlHTTP({
+    schema,
+    rootValue: resolvers,
+    graphiql: true,
+    context: {req, res}
+})(req, res));
 
 app.listen(PORT);
 

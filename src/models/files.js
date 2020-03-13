@@ -4,7 +4,6 @@ const {Schema} = mongoose;
 
 const FilesSchema = new Schema({
     name: String,
-    size: String,
     url: String,
     bookId: {type: Schema.Types.ObjectId, ref: 'Book'},
     dataType: String
